@@ -1,0 +1,1143 @@
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Harrits Alamsyah - Futuristic Space Portfolio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<style>
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: black;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    perspective: 1400px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  #starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    display: block;
+  }
+  #app {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 10;
+  }
+  section {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    user-select: none;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+  section.active {
+    left: 0;
+  }
+  button {
+    cursor: pointer;
+    user-select: none;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+  button:focus {
+    outline: 2px solid #0ff;
+    outline-offset: 2px;
+  }
+  .btn-glow {
+    background: linear-gradient(90deg, #0ff, #06f);
+    border-radius: 9999px;
+    padding: 1rem 3rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white;
+    box-shadow: 0 0 8px #0ff, 0 0 20px #06f;
+    border: none;
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform, box-shadow;
+  }
+  .btn-glow:hover {
+    box-shadow: 0 0 30px #0ff, 0 0 60px #06f;
+    transform: scale(1.15) translateZ(30px);
+  }
+  .nav-btn {
+    background: transparent;
+    border: 2px solid #0ff;
+    border-radius: 9999px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: #0ff;
+    margin: 0 0.5rem;
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform, box-shadow;
+  }
+  .nav-btn:hover {
+    background: #0ff;
+    color: black;
+    box-shadow: 0 0 25px #0ff;
+    transform: scale(1.1) translateZ(15px);
+  }
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2.5rem;
+    width: 100%;
+    max-width: 1200px;
+    perspective: 1400px;
+  }
+  .project-card {
+    background: linear-gradient(135deg, #00111f, #002233);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    box-shadow: 0 0 10px #0ff inset;
+    cursor: pointer;
+    perspective: 1400px;
+    transition: box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-style: preserve-3d;
+    will-change: transform, box-shadow;
+  }
+  .project-card-inner {
+    background: #001a33;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+    width: 100%;
+    will-change: transform;
+  }
+  .project-card:hover {
+    box-shadow: 0 0 40px #0ff, 0 0 80px #06f;
+  }
+  .project-title {
+    margin-top: 0.75rem;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #0ff;
+    text-align: center;
+    transform-style: preserve-3d;
+  }
+  .project-desc {
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    color: #a0e9ff;
+    text-align: center;
+    transform-style: preserve-3d;
+  }
+  .caption {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #66d9ff;
+    font-style: italic;
+    text-align: center;
+    max-width: 100%;
+    user-select: text;
+    transform-style: preserve-3d;
+  }
+  .detail-section {
+    position: absolute;
+    top: 0;
+    left: 100vw;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #000a14, #001f33);
+    padding: 2rem;
+    box-sizing: border-box;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #0ff;
+    transform-style: preserve-3d;
+  }
+  .detail-section.active {
+    left: 0;
+  }
+  .detail-image-svg {
+    width: 90vw;
+    max-width: 800px;
+    height: 40vh;
+    border-radius: 1.25rem;
+    box-shadow: 0 0 30px #0ff;
+    margin-bottom: 0.25rem;
+    background: #001a33;
+    transform-style: preserve-3d;
+  }
+  .detail-title {
+    font-size: 2.25rem;
+    font-weight: 900;
+    margin-bottom: 1.25rem;
+    text-align: center;
+    transform-style: preserve-3d;
+  }
+  .detail-text {
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin-bottom: 2.5rem;
+    color: #a0e9ff;
+    text-align: center;
+    transform-style: preserve-3d;
+  }
+  .detail-tech {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    transform-style: preserve-3d;
+  }
+  .tech-badge {
+    background: linear-gradient(90deg, #0ff, #06f);
+    padding: 0.4rem 1.2rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: black;
+    box-shadow: 0 0 15px #0ff;
+    transform-style: preserve-3d;
+  }
+  .btn-small {
+    background: linear-gradient(90deg, #0ff, #06f);
+    border: none;
+    border-radius: 9999px;
+    padding: 0.6rem 1.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: black;
+    box-shadow: 0 0 15px #0ff;
+    margin: 0 0.5rem;
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    will-change: transform, box-shadow;
+  }
+  .btn-small:hover {
+    box-shadow: 0 0 30px #0ff;
+    transform: scale(1.15) translateZ(20px);
+  }
+  .portfolio-desc {
+    max-width: 700px;
+    font-size: 1.2rem;
+    color: #a0e9ff;
+    margin-bottom: 1.75rem;
+    text-align: center;
+    transform-style: preserve-3d;
+  }
+  .skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+    transform-style: preserve-3d;
+  }
+  .skill-badge {
+    background: linear-gradient(90deg, #0ff, #06f);
+    padding: 0.5rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: black;
+    box-shadow: 0 0 15px #0ff;
+    transform-style: preserve-3d;
+  }
+  .spotify-list {
+    max-width: 600px;
+    width: 100%;
+    background: linear-gradient(135deg, #000a14, #001f33);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    box-shadow: 0 0 30px #0ff;
+    overflow-y: auto;
+    max-height: 60vh;
+    transform-style: preserve-3d;
+  }
+  .spotify-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 1rem;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    will-change: transform, background, box-shadow;
+    transform-style: preserve-3d;
+  }
+  .spotify-item:hover, .spotify-item:focus {
+    background: #0ff2;
+    outline: none;
+    transform: scale(1.07) translateZ(15px);
+    box-shadow: 0 0 30px #0ff;
+  }
+  .spotify-cover-svg {
+    width: 64px;
+    height: 64px;
+    border-radius: 0.75rem;
+    box-shadow: 0 0 15px #0ff;
+    flex-shrink: 0;
+    background: #001a33;
+    transition: transform 0.3s ease;
+    transform-style: preserve-3d;
+  }
+  .spotify-info {
+    flex-grow: 1;
+    transform-style: preserve-3d;
+  }
+  .spotify-title {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #0ff;
+    transform-style: preserve-3d;
+  }
+  .spotify-artist {
+    font-size: 1rem;
+    color: #a0e9ff;
+    transform-style: preserve-3d;
+  }
+  .spotify-duration {
+    font-size: 1rem;
+    color: #a0e9ff;
+    min-width: 50px;
+    text-align: right;
+    transform-style: preserve-3d;
+  }
+  /* Custom SVG styles for project images */
+  .svg-project {
+    width: 100%;
+    height: 180px;
+    border-radius: 1.25rem 1.25rem 0 0;
+    display: block;
+    transform-style: preserve-3d;
+  }
+  @media (max-width: 640px) {
+    .btn-glow {
+      font-size: 1.4rem;
+      padding: 0.9rem 2.5rem;
+    }
+    .nav-btn {
+      font-size: 1.1rem;
+      padding: 0.5rem 1.2rem;
+      margin: 0 0.3rem;
+    }
+    .project-card {
+      padding: 1rem;
+    }
+    .project-title {
+      font-size: 1.15rem;
+    }
+    .project-desc {
+      font-size: 0.95rem;
+    }
+    .detail-title {
+      font-size: 1.8rem;
+    }
+    .detail-text {
+      font-size: 1rem;
+    }
+    .btn-small {
+      font-size: 0.95rem;
+      padding: 0.45rem 1.2rem;
+    }
+    .skill-badge {
+      font-size: 0.9rem;
+      padding: 0.35rem 1rem;
+    }
+    .spotify-cover-svg {
+      width: 52px;
+      height: 52px;
+      border-radius: 0.5rem;
+    }
+    .spotify-title {
+      font-size: 1rem;
+    }
+    .spotify-artist {
+      font-size: 0.85rem;
+    }
+    .spotify-duration {
+      font-size: 0.85rem;
+      min-width: 35px;
+    }
+  }
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+<div id="app" aria-live="polite" aria-atomic="true">
+  <!-- Landing -->
+  <section id="landing" class="active" role="region" aria-label="Landing Page">
+    <h1 class="text-6xl md:text-8xl font-extrabold tracking-widest mb-12 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-lg select-text" style="user-select:text;" tabindex="0">
+      Harrits Alamsyah
+    </h1>
+    <button id="btnStart" class="btn-glow" aria-label="Start Journey to Home Page" tabindex="0">Start Journey</button>
+  </section>
+
+  <!-- Home -->
+  <section id="home" role="region" aria-label="Home Page">
+    <h2 class="text-4xl md:text-5xl font-extrabold mb-8 text-cyan-400 drop-shadow-lg text-center" tabindex="0">
+      Welcome to My Futuristic Space Portfolio
+    </h2>
+    <p class="max-w-xl text-center text-cyan-200 mb-12" tabindex="0">
+      Explore my projects, skills, and favorite tunes in a cosmic journey.
+    </p>
+    <nav aria-label="Primary Navigation" class="flex flex-wrap justify-center gap-6">
+      <button class="nav-btn" data-target="project" aria-label="Go to Project Page" tabindex="0">Project</button>
+      <button class="nav-btn" data-target="portfolio" aria-label="Go to Portfolio Page" tabindex="0">Portfolio</button>
+      <button class="nav-btn" data-target="spotify" aria-label="Go to Spotify Page" tabindex="0">Spotify</button>
+      <button class="nav-btn" data-target="thankyou" aria-label="Go to Thank You Page" tabindex="0">Thank You</button>
+    </nav>
+  </section>
+
+  <!-- Project -->
+  <section id="project" role="region" aria-label="Project Page">
+    <h2 class="text-4xl md:text-5xl font-extrabold mb-8 text-cyan-400 drop-shadow-lg text-center" tabindex="0">
+      Projects
+    </h2>
+    <div class="project-grid" role="list" aria-label="Project List">
+      <article tabindex="0" role="listitem" class="project-card" data-index="0" aria-label="Project Space Explorer UI" aria-describedby="caption0">
+        <div class="project-card-inner">
+          <svg class="svg-project" viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of Space Explorer UI project with star map and dashboard">
+            <defs>
+              <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#0ff" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#004466" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="400" height="250" fill="#001a33"/>
+            <circle cx="200" cy="125" r="100" fill="url(#grad1)"/>
+            <circle cx="200" cy="125" r="90" fill="none" stroke="#0ff" stroke-width="2" stroke-dasharray="10 10"/>
+            <circle cx="200" cy="125" r="70" fill="none" stroke="#0ff" stroke-width="1" stroke-dasharray="5 5"/>
+            <line x1="200" y1="125" x2="300" y2="125" stroke="#0ff" stroke-width="1" stroke-dasharray="3 3"/>
+            <line x1="200" y1="125" x2="200" y2="25" stroke="#0ff" stroke-width="1" stroke-dasharray="3 3"/>
+            <circle cx="250" cy="125" r="5" fill="#0ff"/>
+            <circle cx="200" cy="75" r="5" fill="#0ff"/>
+            <circle cx="150" cy="125" r="3" fill="#0ff"/>
+            <circle cx="200" cy="175" r="3" fill="#0ff"/>
+            <text x="10" y="240" fill="#0ff" font-family="monospace" font-size="14">Space Explorer UI</text>
+          </svg>
+          <div class="caption" id="caption0">Illustration of Space Explorer UI project with star map and dashboard</div>
+          <h3 class="project-title">Space Explorer UI</h3>
+          <p class="project-desc">Futuristic dashboard interface for space missions.</p>
+        </div>
+      </article>
+      <article tabindex="0" role="listitem" class="project-card" data-index="1" aria-label="Project Galactic E-commerce" aria-describedby="caption1">
+        <div class="project-card-inner">
+          <svg class="svg-project" viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of Galactic E-commerce project with cosmic product displays">
+            <rect width="400" height="250" fill="#001a33"/>
+            <rect x="40" y="40" width="80" height="80" fill="#0ff" rx="10" ry="10" opacity="0.7"/>
+            <rect x="140" y="40" width="80" height="80" fill="#06f" rx="10" ry="10" opacity="0.7"/>
+            <rect x="240" y="40" width="80" height="80" fill="#0ff" rx="10" ry="10" opacity="0.7"/>
+            <rect x="90" y="140" width="80" height="80" fill="#06f" rx="10" ry="10" opacity="0.7"/>
+            <rect x="190" y="140" width="80" height="80" fill="#0ff" rx="10" ry="10" opacity="0.7"/>
+            <rect x="290" y="140" width="80" height="80" fill="#06f" rx="10" ry="10" opacity="0.7"/>
+            <text x="10" y="240" fill="#0ff" font-family="monospace" font-size="14">Galactic E-commerce</text>
+          </svg>
+          <div class="caption" id="caption1">Illustration of Galactic E-commerce project with cosmic product displays</div>
+          <h3 class="project-title">Galactic E-commerce</h3>
+          <p class="project-desc">Space-themed e-commerce platform for collectibles.</p>
+        </div>
+      </article>
+      <article tabindex="0" role="listitem" class="project-card" data-index="2" aria-label="Project Astro Blog Platform" aria-describedby="caption2">
+        <div class="project-card-inner">
+          <svg class="svg-project" viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of Astro Blog Platform project with starry background and article previews">
+            <rect width="400" height="250" fill="#001a33"/>
+            <circle cx="60" cy="60" r="10" fill="#0ff" opacity="0.7"/>
+            <circle cx="120" cy="60" r="10" fill="#06f" opacity="0.7"/>
+            <circle cx="180" cy="60" r="10" fill="#0ff" opacity="0.7"/>
+            <rect x="40" y="100" width="320" height="20" fill="#0ff" opacity="0.5" rx="5" ry="5"/>
+            <rect x="40" y="130" width="280" height="15" fill="#06f" opacity="0.5" rx="5" ry="5"/>
+            <rect x="40" y="155" width="300" height="15" fill="#0ff" opacity="0.5" rx="5" ry="5"/>
+            <text x="10" y="240" fill="#0ff" font-family="monospace" font-size="14">Astro Blog Platform</text>
+          </svg>
+          <div class="caption" id="caption2">Illustration of Astro Blog Platform project with starry background and article previews</div>
+          <h3 class="project-title">Astro Blog Platform</h3>
+          <p class="project-desc">Blogging platform for astronomy enthusiasts.</p>
+        </div>
+      </article>
+    </div>
+    <div class="mt-10 flex justify-center gap-6">
+      <button id="btnProjectBack" class="btn-small" aria-label="Back to Home Page" tabindex="0">Back</button>
+      <button id="btnProjectNext" class="btn-small" aria-label="Next to Portfolio Page" tabindex="0">Next</button>
+    </div>
+  </section>
+
+  <!-- Project Detail -->
+  <section id="projectDetail" class="detail-section" role="region" aria-label="Project Detail Page" aria-hidden="true">
+    <button id="btnProjectDetailBack" class="btn-small mb-6" aria-label="Back to Project Page" tabindex="0">Back</button>
+    <h3 class="detail-title" id="projectDetailTitle"></h3>
+    <svg id="projectDetailImage" class="detail-image-svg" role="img" aria-label="Detailed illustration of project" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet" fill="none" stroke="#0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    <div class="caption" id="projectDetailCaption"></div>
+    <p class="detail-text" id="projectDetailDesc"></p>
+    <div class="detail-tech" id="projectDetailTech"></div>
+    <a href="#" target="_blank" rel="noopener noreferrer" id="projectDetailLink" class="btn-small" aria-label="View Project Online" tabindex="0">View Project</a>
+  </section>
+
+  <!-- Portfolio -->
+  <section id="portfolio" role="region" aria-label="Portfolio Page">
+    <h2 class="text-4xl md:text-5xl font-extrabold mb-6 text-cyan-400 drop-shadow-lg text-center" tabindex="0">
+      About Harrits Alamsyah
+    </h2>
+    <p class="portfolio-desc" tabindex="0">
+      Harrits Alamsyah is a visionary UI/UX designer and developer passionate about crafting futuristic digital experiences inspired by the cosmos. Skilled in interactive 3D interfaces and smooth animations.
+    </p>
+    <div class="skill-list" aria-label="Skills List">
+      <span class="skill-badge" aria-label="JavaScript Skill" tabindex="0">JavaScript</span>
+      <span class="skill-badge" aria-label="React Skill" tabindex="0">React</span>
+      <span class="skill-badge" aria-label="CSS3 Skill" tabindex="0">CSS3</span>
+      <span class="skill-badge" aria-label="HTML5 Skill" tabindex="0">HTML5</span>
+      <span class="skill-badge" aria-label="Three.js Skill" tabindex="0">Three.js</span>
+      <span class="skill-badge" aria-label="GSAP Skill" tabindex="0">GSAP</span>
+    </div>
+    <div class="project-grid" role="list" aria-label="Portfolio Projects List">
+      <article tabindex="0" role="listitem" class="project-card" data-index="0" aria-label="Portfolio Project Star Navigator" aria-describedby="captionP0">
+        <div class="project-card-inner">
+          <svg class="svg-project" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of Star Navigator app with star charts and navigation tools">
+            <rect width="400" height="200" fill="#001a33"/>
+            <circle cx="200" cy="100" r="80" fill="url(#gradStarNav)" />
+            <defs>
+              <radialGradient id="gradStarNav" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#0ff" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#004466" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <circle cx="200" cy="100" r="70" fill="none" stroke="#0ff" stroke-width="2" stroke-dasharray="8 8"/>
+            <line x1="200" y1="20" x2="200" y2="180" stroke="#0ff" stroke-width="1" stroke-dasharray="4 4"/>
+            <line x1="120" y1="100" x2="280" y2="100" stroke="#0ff" stroke-width="1" stroke-dasharray="4 4"/>
+            <circle cx="240" cy="100" r="6" fill="#0ff"/>
+            <circle cx="160" cy="100" r="4" fill="#0ff"/>
+            <text x="10" y="190" fill="#0ff" font-family="monospace" font-size="14">Star Navigator</text>
+          </svg>
+          <div class="caption" id="captionP0">Illustration of Star Navigator app with star charts and navigation tools</div>
+          <h3 class="project-title">Star Navigator</h3>
+          <p class="project-desc">Interactive star charts and constellation guides.</p>
+        </div>
+      </article>
+      <article tabindex="0" role="listitem" class="project-card" data-index="1" aria-label="Portfolio Project Cosmic Chat" aria-describedby="captionP1">
+        <div class="project-card-inner">
+          <svg class="svg-project" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of Cosmic Chat app with space-themed chat bubbles">
+            <rect width="400" height="200" fill="#001a33"/>
+            <rect x="50" y="50" width="120" height="80" rx="15" ry="15" fill="#0ff" opacity="0.7"/>
+            <rect x="230" y="70" width="110" height="60" rx="15" ry="15" fill="#06f" opacity="0.7"/>
+            <circle cx="80" cy="80" r="10" fill="#06f"/>
+            <circle cx="270" cy="100" r="8" fill="#0ff"/>
+            <text x="10" y="190" fill="#0ff" font-family="monospace" font-size="14">Cosmic Chat</text>
+          </svg>
+          <div class="caption" id="captionP1">Illustration of Cosmic Chat app with space-themed chat bubbles</div>
+          <h3 class="project-title">Cosmic Chat</h3>
+          <p class="project-desc">Space-themed chat platform with animated backgrounds.</p>
+        </div>
+      </article>
+      <article tabindex="0" role="listitem" class="project-card" data-index="2" aria-label="Portfolio Project Nebula Notes" aria-describedby="captionP2">
+        <div class="project-card-inner">
+          <svg class="svg-project" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of Nebula Notes app with starry note cards and cosmic UI">
+            <rect width="400" height="200" fill="#001a33"/>
+            <rect x="40" y="40" width="100" height="120" rx="15" ry="15" fill="#0ff" opacity="0.7"/>
+            <rect x="160" y="60" width="100" height="100" rx="15" ry="15" fill="#06f" opacity="0.7"/>
+            <rect x="280" y="50" width="90" height="110" rx="15" ry="15" fill="#0ff" opacity="0.7"/>
+            <circle cx="90" cy="90" r="8" fill="#06f"/>
+            <circle cx="210" cy="110" r="6" fill="#0ff"/>
+            <circle cx="320" cy="100" r="7" fill="#06f"/>
+            <text x="10" y="190" fill="#0ff" font-family="monospace" font-size="14">Nebula Notes</text>
+          </svg>
+          <div class="caption" id="captionP2">Illustration of Nebula Notes app with starry note cards and cosmic UI</div>
+          <h3 class="project-title">Nebula Notes</h3>
+          <p class="project-desc">Note-taking app with nebula-inspired interface.</p>
+        </div>
+      </article>
+    </div>
+    <div class="mt-10 flex justify-center gap-6">
+      <button id="btnPortfolioBack" class="btn-small" aria-label="Back to Home Page" tabindex="0">Back</button>
+      <button id="btnPortfolioNext" class="btn-small" aria-label="Next to Spotify Page" tabindex="0">Next</button>
+    </div>
+  </section>
+
+  <!-- Portfolio Detail -->
+  <section id="portfolioDetail" class="detail-section" role="region" aria-label="Portfolio Project Detail Page" aria-hidden="true">
+    <button id="btnPortfolioDetailBack" class="btn-small mb-6" aria-label="Back to Portfolio Page" tabindex="0">Back</button>
+    <h3 class="detail-title" id="portfolioDetailTitle"></h3>
+    <svg id="portfolioDetailImage" class="detail-image-svg" role="img" aria-label="Detailed illustration of portfolio project" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet" fill="none" stroke="#0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    <div class="caption" id="portfolioDetailCaption"></div>
+    <p class="detail-text" id="portfolioDetailDesc"></p>
+    <div class="detail-tech" id="portfolioDetailTech"></div>
+    <a href="#" target="_blank" rel="noopener noreferrer" id="portfolioDetailLink" class="btn-small" aria-label="View Portfolio Project Online" tabindex="0">View Project</a>
+  </section>
+
+  <!-- Spotify -->
+  <section id="spotify" role="region" aria-label="Spotify Page">
+    <h2 class="text-4xl md:text-5xl font-extrabold mb-8 text-cyan-400 drop-shadow-lg text-center" tabindex="0">
+      Favorite Spotify Tracks
+    </h2>
+    <div class="spotify-list" role="list" aria-label="Favorite Spotify Tracks List" tabindex="0">
+      <div class="spotify-item" role="listitem" aria-label="Track Cosmic Voyage by Harrits Alamsyah, duration 4 minutes 12 seconds" tabindex="0">
+        <svg class="spotify-cover-svg" role="img" aria-label="Illustration of Cosmic Voyage album cover with abstract cosmic shapes and stars" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="32" cy="32" r="30" stroke="#0ff" stroke-opacity="0.6"/>
+          <circle cx="20" cy="20" r="4" fill="#0ff"/>
+          <circle cx="44" cy="44" r="6" fill="none" stroke="#0ff" stroke-dasharray="4 4"/>
+          <line x1="32" y1="2" x2="32" y2="62" stroke="#0ff" stroke-opacity="0.3"/>
+          <line x1="2" y1="32" x2="62" y2="32" stroke="#0ff" stroke-opacity="0.3"/>
+          <path d="M15 50 L25 40 L35 50" stroke="#0ff" fill="none"/>
+          <path d="M40 15 L50 25 L40 35" stroke="#0ff" fill="none"/>
+        </svg>
+        <div class="spotify-info">
+          <div class="spotify-title">Cosmic Voyage</div>
+          <div class="spotify-artist">Harrits Alamsyah</div>
+        </div>
+        <div class="spotify-duration">4:12</div>
+      </div>
+      <div class="spotify-item" role="listitem" aria-label="Track Nebula Dreams by Harrits Alamsyah, duration 3 minutes 45 seconds" tabindex="0">
+        <svg class="spotify-cover-svg" role="img" aria-label="Illustration of Nebula Dreams album cover with colorful nebula cloud shapes and stars" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <defs>
+            <radialGradient id="nebulaGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#0ff" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#004466" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="32" cy="32" r="28" fill="url(#nebulaGrad)"/>
+          <circle cx="22" cy="22" r="5" fill="#0ff" opacity="0.7"/>
+          <circle cx="42" cy="42" r="7" fill="#06f" opacity="0.5"/>
+          <circle cx="32" cy="32" r="10" fill="none" stroke="#0ff" stroke-dasharray="6 6"/>
+          <line x1="10" y1="54" x2="54" y2="10" stroke="#0ff" stroke-opacity="0.3"/>
+        </svg>
+        <div class="spotify-info">
+          <div class="spotify-title">Nebula Dreams</div>
+          <div class="spotify-artist">Harrits Alamsyah</div>
+        </div>
+        <div class="spotify-duration">3:45</div>
+      </div>
+      <div class="spotify-item" role="listitem" aria-label="Track Stellar Winds by Harrits Alamsyah, duration 5 minutes 1 second" tabindex="0">
+        <svg class="spotify-cover-svg" role="img" aria-label="Illustration of Stellar Winds album cover with starfield and cosmic wave lines" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="32" cy="32" r="30" stroke="#0ff" stroke-opacity="0.6"/>
+          <path d="M5 40 Q20 20 35 40 T60 40" stroke="#0ff" fill="none" stroke-dasharray="8 4"/>
+          <circle cx="20" cy="20" r="3" fill="#0ff"/>
+          <circle cx="44" cy="44" r="5" fill="none" stroke="#0ff" stroke-dasharray="4 4"/>
+          <line x1="32" y1="10" x2="32" y2="54" stroke="#0ff" stroke-opacity="0.3"/>
+        </svg>
+        <div class="spotify-info">
+          <div class="spotify-title">Stellar Winds</div>
+          <div class="spotify-artist">Harrits Alamsyah</div>
+        </div>
+        <div class="spotify-duration">5:01</div>
+      </div>
+      <div class="spotify-item" role="listitem" aria-label="Track Orbiting Echoes by Harrits Alamsyah, duration 3 minutes 33 seconds" tabindex="0">
+        <svg class="spotify-cover-svg" role="img" aria-label="Illustration of Orbiting Echoes album cover with abstract orbit rings and dots" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="32" cy="32" r="28" stroke="#0ff" stroke-opacity="0.6"/>
+          <ellipse cx="32" cy="32" rx="20" ry="10" fill="none" stroke="#0ff" stroke-dasharray="6 6"/>
+          <ellipse cx="32" cy="32" rx="10" ry="20" fill="none" stroke="#0ff" stroke-dasharray="4 4"/>
+          <circle cx="45" cy="32" r="3" fill="#0ff"/>
+          <circle cx="19" cy="32" r="3" fill="#0ff"/>
+          <line x1="32" y1="2" x2="32" y2="62" stroke="#0ff" stroke-opacity="0.3"/>
+        </svg>
+        <div class="spotify-info">
+          <div class="spotify-title">Orbiting Echoes</div>
+          <div class="spotify-artist">Harrits Alamsyah</div>
+        </div>
+        <div class="spotify-duration">3:33</div>
+      </div>
+      <div class="spotify-item" role="listitem" aria-label="Track Galaxy Drift by Harrits Alamsyah, duration 4 minutes 20 seconds" tabindex="0">
+        <svg class="spotify-cover-svg" role="img" aria-label="Illustration of Galaxy Drift album cover with drifting galaxy spiral and stars" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="32" cy="32" r="30" stroke="#0ff" stroke-opacity="0.6"/>
+          <path d="M32 32 m-20 0 a20 20 0 1 1 40 0 a20 20 0 1 1 -40 0" fill="none" stroke="#0ff" stroke-dasharray="10 5"/>
+          <circle cx="32" cy="12" r="3" fill="#0ff"/>
+          <circle cx="42" cy="42" r="4" fill="none" stroke="#0ff" stroke-dasharray="4 4"/>
+          <circle cx="22" cy="22" r="2" fill="#0ff"/>
+          <line x1="10" y1="54" x2="54" y2="10" stroke="#0ff" stroke-opacity="0.3"/>
+        </svg>
+        <div class="spotify-info">
+          <div class="spotify-title">Galaxy Drift</div>
+          <div class="spotify-artist">Harrits Alamsyah</div>
+        </div>
+        <div class="spotify-duration">4:20</div>
+      </div>
+    </div>
+    <div class="mt-10 flex justify-center">
+      <button id="btnSpotifyNext" class="btn-small" aria-label="Next to Thank You Page" tabindex="0">Next</button>
+    </div>
+  </section>
+
+  <!-- Thank You -->
+  <section id="thankyou" role="region" aria-label="Thank You Page">
+    <h2 class="text-5xl md:text-7xl font-extrabold mb-8 tracking-wide text-cyan-400 drop-shadow-lg opacity-0" id="thankYouText" tabindex="0">
+      Thank You for Visiting!
+    </h2>
+    <button id="btnThankYouBack" class="btn-glow mt-6" aria-label="Back to Landing Page" tabindex="0">Back to Landing</button>
+  </section>
+</div>
+
+<script>
+  // Three.js Starfield with subtle twinkle effect
+  (() => {
+    const canvas = document.getElementById("starfield");
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.z = 5;
+
+    const starCount = 1500;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(starCount * 3);
+    const opacities = new Float32Array(starCount);
+
+    for (let i = 0; i < starCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 200;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 200;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 200;
+      opacities[i] = Math.random();
+    }
+
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("opacity", new THREE.BufferAttribute(opacities, 1));
+
+    const starMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.15,
+      sizeAttenuation: true,
+      transparent: true,
+      vertexColors: false,
+      opacity: 0.8,
+    });
+
+    const stars = new THREE.Points(geometry, starMaterial);
+    scene.add(stars);
+
+    let time = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      time += 0.01;
+      const opacities = geometry.attributes.opacity.array;
+      for (let i = 0; i < starCount; i++) {
+        opacities[i] = 0.5 + 0.5 * Math.sin(time + i);
+      }
+      geometry.attributes.opacity.needsUpdate = true;
+      starMaterial.opacity = 0.8;
+
+      const pos = geometry.attributes.position.array;
+      for (let i = 0; i < starCount; i++) {
+        pos[i * 3 + 2] += 0.03;
+        if (pos[i * 3 + 2] > 100) {
+          pos[i * 3 + 2] = -100;
+          pos[i * 3] = (Math.random() - 0.5) * 200;
+          pos[i * 3 + 1] = (Math.random() - 0.5) * 200;
+        }
+      }
+      geometry.attributes.position.needsUpdate = true;
+
+      renderer.render(scene, camera);
+    }
+
+    function onResize() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", onResize);
+    onResize();
+    animate();
+  })();
+
+  // Navigation & Animations with enhanced 3D effects and smooth transitions
+  (() => {
+    const sections = [
+      "landing",
+      "home",
+      "project",
+      "projectDetail",
+      "portfolio",
+      "portfolioDetail",
+      "spotify",
+      "thankyou",
+    ];
+
+    let current = "landing";
+
+    const app = document.getElementById("app");
+
+    // Show section by id, hide others with 3D flip and fade
+    function showSection(id) {
+      sections.forEach((secId) => {
+        const sec = document.getElementById(secId);
+        if (!sec) return;
+        if (secId === id) {
+          sec.classList.add("active");
+          sec.setAttribute("aria-hidden", "false");
+          gsap.fromTo(
+            sec,
+            { rotationY: 90, opacity: 0, scale: 0.9 },
+            { rotationY: 0, opacity: 1, scale: 1, duration: 1, ease: "power3.out" }
+          );
+        } else {
+          if (sec.classList.contains("active")) {
+            gsap.to(sec, {
+              rotationY: -90,
+              opacity: 0,
+              scale: 0.9,
+              duration: 0.8,
+              ease: "power3.in",
+              onComplete: () => {
+                sec.classList.remove("active");
+                sec.setAttribute("aria-hidden", "true");
+                sec.style.transform = "";
+                sec.style.opacity = "";
+              },
+            });
+          } else {
+            sec.classList.remove("active");
+            sec.setAttribute("aria-hidden", "true");
+          }
+        }
+      });
+      current = id;
+    }
+
+    // Initial show landing
+    showSection("landing");
+
+    // Button Start Journey
+    document.getElementById("btnStart").addEventListener("click", () => {
+      showSection("home");
+    });
+
+    // Home nav buttons
+    document.querySelectorAll("#home .nav-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.getAttribute("data-target");
+        if (target === "project") showSection("project");
+        else if (target === "portfolio") showSection("portfolio");
+        else if (target === "spotify") showSection("spotify");
+        else if (target === "thankyou") showSection("thankyou");
+      });
+    });
+
+    // Project page buttons
+    document.getElementById("btnProjectBack").addEventListener("click", () => {
+      showSection("home");
+    });
+    document.getElementById("btnProjectNext").addEventListener("click", () => {
+      showSection("portfolio");
+    });
+
+    // Portfolio page buttons
+    document.getElementById("btnPortfolioBack").addEventListener("click", () => {
+      showSection("home");
+    });
+    document.getElementById("btnPortfolioNext").addEventListener("click", () => {
+      showSection("spotify");
+    });
+
+    // Spotify next button
+    document.getElementById("btnSpotifyNext").addEventListener("click", () => {
+      showSection("thankyou");
+    });
+
+    // Thank You back button
+    document.getElementById("btnThankYouBack").addEventListener("click", () => {
+      showSection("landing");
+    });
+
+    // Project data with SVG elements for detail
+    const projects = [
+      {
+        title: "Space Explorer UI",
+        desc: "Futuristic dashboard interface for space missions. Features interactive star maps and real-time data visualization.",
+        svg: `<defs>
+                <radialGradient id="gradDetail1" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#0ff" stop-opacity="0.8"/>
+                  <stop offset="100%" stop-color="#004466" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <rect width="800" height="450" fill="#001a33"/>
+              <circle cx="400" cy="225" r="200" fill="url(#gradDetail1)"/>
+              <circle cx="400" cy="225" r="180" fill="none" stroke="#0ff" stroke-width="4" stroke-dasharray="20 20"/>
+              <circle cx="400" cy="225" r="140" fill="none" stroke="#0ff" stroke-width="2" stroke-dasharray="10 10"/>
+              <line x1="400" y1="225" x2="600" y2="225" stroke="#0ff" stroke-width="2" stroke-dasharray="6 6"/>
+              <line x1="400" y1="225" x2="400" y2="50" stroke="#0ff" stroke-width="2" stroke-dasharray="6 6"/>
+              <circle cx="500" cy="225" r="10" fill="#0ff"/>
+              <circle cx="400" cy="150" r="10" fill="#0ff"/>
+              <circle cx="300" cy="225" r="6" fill="#0ff"/>
+              <circle cx="400" cy="300" r="6" fill="#0ff"/>
+              <text x="20" y="430" fill="#0ff" font-family="monospace" font-size="24">Space Explorer UI</text>`,
+        caption: "Detailed illustration of Space Explorer UI project with star maps and dashboard",
+        tech: ["React", "Three.js", "GSAP", "Tailwind CSS"],
+        link: "#",
+      },
+      {
+        title: "Galactic E-commerce",
+        desc: "Space-themed e-commerce platform for collectibles. Includes cosmic product showcases and smooth animations.",
+        svg: `<rect width="800" height="450" fill="#001a33"/>
+              <rect x="80" y="80" width="160" height="160" fill="#0ff" rx="20" ry="20" opacity="0.7"/>
+              <rect x="280" y="80" width="160" height="160" fill="#06f" rx="20" ry="20" opacity="0.7"/>
+              <rect x="480" y="80" width="160" height="160" fill="#0ff" rx="20" ry="20" opacity="0.7"/>
+              <rect x="180" y="280" width="160" height="160" fill="#06f" rx="20" ry="20" opacity="0.7"/>
+              <rect x="380" y="280" width="160" height="160" fill="#0ff" rx="20" ry="20" opacity="0.7"/>
+              <rect x="580" y="280" width="160" height="160" fill="#06f" rx="20" ry="20" opacity="0.7"/>
+              <text x="20" y="430" fill="#0ff" font-family="monospace" font-size="24">Galactic E-commerce</text>`,
+        caption: "Detailed illustration of Galactic E-commerce project with cosmic product showcases",
+        tech: ["JavaScript", "CSS3", "GSAP", "Tailwind CSS"],
+        link: "#",
+      },
+      {
+        title: "Astro Blog Platform",
+        desc: "Blogging platform for astronomy enthusiasts with starry backgrounds and article previews.",
+        svg: `<rect width="800" height="450" fill="#001a33"/>
+              <circle cx="120" cy="120" r="20" fill="#0ff" opacity="0.7"/>
+              <circle cx="240" cy="120" r="20" fill="#06f" opacity="0.7"/>
+              <circle cx="360" cy="120" r="20" fill="#0ff" opacity="0.7"/>
+              <rect x="80" y="200" width="640" height="40" fill="#0ff" opacity="0.5" rx="10" ry="10"/>
+              <rect x="80" y="260" width="560" height="30" fill="#06f" opacity="0.5" rx="10" ry="10"/>
+              <rect x="80" y="310" width="600" height="30" fill="#0ff" opacity="0.5" rx="10" ry="10"/>
+              <text x="20" y="430" fill="#0ff" font-family="monospace" font-size="24">Astro Blog Platform</text>`,
+        caption: "Detailed illustration of Astro Blog Platform project with starry background and articles",
+        tech: ["HTML5", "CSS3", "GSAP", "Tailwind CSS"],
+        link: "#",
+      },
+    ];
+
+    // Portfolio data with SVG elements for detail
+    const portfolios = [
+      {
+        title: "Star Navigator",
+        desc: "App to navigate stars with interactive star charts and constellation guides.",
+        svg: `<rect width="800" height="400" fill="#001a33"/>
+              <circle cx="400" cy="200" r="160" fill="url(#gradStarNavDetail)" />
+              <defs>
+                <radialGradient id="gradStarNavDetail" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#0ff" stop-opacity="0.8"/>
+                  <stop offset="100%" stop-color="#004466" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <circle cx="400" cy="200" r="140" fill="none" stroke="#0ff" stroke-width="4" stroke-dasharray="16 16"/>
+              <line x1="400" y1="40" x2="400" y2="360" stroke="#0ff" stroke-width="2" stroke-dasharray="8 8"/>
+              <line x1="240" y1="200" x2="560" y2="200" stroke="#0ff" stroke-width="2" stroke-dasharray="8 8"/>
+              <circle cx="480" cy="200" r="12" fill="#0ff"/>
+              <circle cx="320" cy="200" r="8" fill="#0ff"/>
+              <text x="20" y="380" fill="#0ff" font-family="monospace" font-size="28">Star Navigator</text>`,
+        caption: "Detailed illustration of Star Navigator app with star charts and navigation tools",
+        tech: ["React", "Three.js", "Tailwind CSS"],
+        link: "#",
+      },
+      {
+        title: "Cosmic Chat",
+        desc: "Space-themed chat platform with animated backgrounds and smooth interactions.",
+        svg: `<rect width="800" height="400" fill="#001a33"/>
+              <rect x="100" y="100" width="240" height="160" rx="30" ry="30" fill="#0ff" opacity="0.7"/>
+              <rect x="460" y="140" width="220" height="120" rx="30" ry="30" fill="#06f" opacity="0.7"/>
+              <circle cx="160" cy="160" r="20" fill="#06f"/>
+              <circle cx="540" cy="200" r="16" fill="#0ff"/>
+              <text x="20" y="380" fill="#0ff" font-family="monospace" font-size="28">Cosmic Chat</text>`,
+        caption: "Detailed illustration of Cosmic Chat app with space chat bubbles",
+        tech: ["JavaScript", "CSS3", "GSAP"],
+        link: "#",
+      },
+      {
+        title: "Nebula Notes",
+        desc: "Note-taking app with nebula-inspired interface and starry note cards.",
+        svg: `<rect width="800" height="400" fill="#001a33"/>
+              <rect x="80" y="80" width="200" height="240" rx="30" ry="30" fill="#0ff" opacity="0.7"/>
+              <rect x="320" y="120" width="200" height="200" rx="30" ry="30" fill="#06f" opacity="0.7"/>
+              <rect x="560" y="100" width="180" height="220" rx="30" ry="30" fill="#0ff" opacity="0.7"/>
+              <circle cx="130" cy="140" r="16" fill="#06f"/>
+              <circle cx="420" cy="180" r="12" fill="#0ff"/>
+              <circle cx="650" cy="160" r="14" fill="#06f"/>
+              <text x="20" y="380" fill="#0ff" font-family="monospace" font-size="28">Nebula Notes</text>`,
+        caption: "Detailed illustration of Nebula Notes app with starry note cards and cosmic UI",
+        tech: ["HTML5", "CSS3", "GSAP"],
+        link: "#",
+      },
+    ];
+
+    // Project Detail Elements
+    const projectDetailSection = document.getElementById("projectDetail");
+    const projectDetailTitle = document.getElementById("projectDetailTitle");
+    const projectDetailImage = document.getElementById("projectDetailImage");
+    const projectDetailDesc = document.getElementById("projectDetailDesc");
+    const projectDetailTech = document.getElementById("projectDetailTech");
+    const projectDetailLink = document.getElementById("projectDetailLink");
+    const projectDetailCaption = document.getElementById("projectDetailCaption");
+    const btnProjectDetailBack = document.getElementById("btnProjectDetailBack");
+
+    // Portfolio Detail Elements
+    const portfolioDetailSection = document.getElementById("portfolioDetail");
+    const portfolioDetailTitle = document.getElementById("portfolioDetailTitle");
+    const portfolioDetailImage = document.getElementById("portfolioDetailImage");
+    const portfolioDetailDesc = document.getElementById("portfolioDetailDesc");
+    const portfolioDetailTech = document.getElementById("portfolioDetailTech");
+    const portfolioDetailLink = document.getElementById("portfolioDetailLink");
+    const portfolioDetailCaption = document.getElementById("portfolioDetailCaption");
+    const btnPortfolioDetailBack = document.getElementById("btnPortfolioDetailBack");
+
+    // Show project detail
+    function openProjectDetail(index) {
+      const p = projects[index];
+      projectDetailTitle.textContent = p.title;
+      projectDetailImage.innerHTML = p.svg;
+      projectDetailCaption.textContent = p.caption;
+      projectDetailDesc.textContent = p.desc;
+      projectDetailTech.innerHTML = p.tech
+        .map(
+          (t) =>
+            `<span class="tech-badge" aria-label="Technology ${t}">${t}</span>`
+        )
+        .join("");
+      projectDetailLink.href = p.link;
+      projectDetailSection.setAttribute("aria-hidden", "false");
+      showSection("projectDetail");
+      gsap.fromTo(projectDetailImage, { scale: 0.8, opacity: 0, rotationY: 90 }, { scale: 1, opacity: 1, rotationY: 0, duration: 0.8, ease: "power2.out" });
+    }
+    // Close project detail
+    btnProjectDetailBack.addEventListener("click", () => {
+      showSection("project");
+    });
+
+    // Show portfolio detail
+    function openPortfolioDetail(index) {
+      const p = portfolios[index];
+      portfolioDetailTitle.textContent = p.title;
+      portfolioDetailImage.innerHTML = p.svg;
+      portfolioDetailCaption.textContent = p.caption;
+      portfolioDetailDesc.textContent = p.desc;
+      portfolioDetailTech.innerHTML = p.tech
+        .map(
+          (t) =>
+            `<span class="tech-badge" aria-label="Technology ${t}">${t}</span>`
+        )
+        .join("");
+      portfolioDetailLink.href = p.link;
+      portfolioDetailSection.setAttribute("aria-hidden", "false");
+      showSection("portfolioDetail");
+      gsap.fromTo(portfolioDetailImage, { scale: 0.8, opacity: 0, rotationY: 90 }, { scale: 1, opacity: 1, rotationY: 0, duration: 0.8, ease: "power2.out" });
+    }
+    // Close portfolio detail
+    btnPortfolioDetailBack.addEventListener("click", () => {
+      showSection("portfolio");
+    });
+
+    // Project cards click and keyboard with enhanced 3D tilt and glow
+    document.querySelectorAll("#project .project-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        openProjectDetail(parseInt(card.dataset.index));
+      });
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openProjectDetail(parseInt(card.dataset.index));
+        }
+      });
+      card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const inner = card.querySelector(".project-card-inner");
+        const rotateX = (-y / rect.height) * 18;
+        const rotateY = (x / rect.width) * 18;
+        gsap.to(inner, { rotationX: rotateX, rotationY: rotateY, z: 40, duration: 0.3, ease: "power3.out" });
+        gsap.to(card, { boxShadow: "0 0 50px #0ff, 0 0 100px #06f", scale: 1.15, duration: 0.3, ease: "power3.out" });
+      });
+      card.addEventListener("mouseleave", () => {
+        const inner = card.querySelector(".project-card-inner");
+        gsap.to(inner, { rotationX: 0, rotationY: 0, z: 0, duration: 0.5, ease: "power3.out" });
+        gsap.to(card, { boxShadow: "0 0 10px #0ff inset", scale: 1, duration: 0.5, ease: "power3.out" });
+      });
+    });
+
+    // Portfolio cards click and keyboard with enhanced 3D tilt and glow
+    document.querySelectorAll("#portfolio .project-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        openPortfolioDetail(parseInt(card.dataset.index));
+      });
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openPortfolioDetail(parseInt(card.dataset.index));
+        }
+      });
+      card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const inner = card.querySelector(".project-card-inner");
+        const rotateX = (-y / rect.height) * 14;
+        const rotateY = (x / rect.width) * 14;
+        gsap.to(inner, { rotationX: rotateX, rotationY: rotateY, z: 30, duration: 0.3, ease: "power3.out" });
+        gsap.to(card, { boxShadow: "0 0 45px #0ff, 0 0 90px #06f", scale: 1.1, duration: 0.3, ease: "power3.out" });
+      });
+      card.addEventListener("mouseleave", () => {
+        const inner = card.querySelector(".project-card-inner");
+        gsap.to(inner, { rotationX: 0, rotationY: 0, z: 0, duration: 0.5, ease: "power3.out" });
+        gsap.to(card, { boxShadow: "0 0 10px #0ff inset", scale: 1, duration: 0.5, ease: "power3.out" });
+      });
+    });
+
+    // Spotify item hover and focus animations with 3D scale and rotation
+    document.querySelectorAll(".spotify-item").forEach((item) => {
+      item.addEventListener("mouseenter", () => {
+        gsap.to(item.querySelector(".spotify-cover-svg"), { scale: 1.2, rotation: 10, duration: 0.3, ease: "power3.out" });
+        gsap.to(item, { scale: 1.05, boxShadow: "0 0 35px #0ff", duration: 0.3, ease: "power3.out" });
+      });
+      item.addEventListener("mouseleave", () => {
+        gsap.to(item.querySelector(".spotify-cover-svg"), { scale: 1, rotation: 0, duration: 0.3, ease: "power3.out" });
+        gsap.to(item, { scale: 1, boxShadow: "none", duration: 0.3, ease: "power3.out" });
+      });
+      item.addEventListener("focus", () => {
+        gsap.to(item.querySelector(".spotify-cover-svg"), { scale: 1.2, rotation: 10, duration: 0.3, ease: "power3.out" });
+        gsap.to(item, { scale: 1.05, boxShadow: "0 0 35px #0ff", duration: 0.3, ease: "power3.out" });
+      });
+      item.addEventListener("blur", () => {
+        gsap.to(item.querySelector(".spotify-cover-svg"), { scale: 1, rotation: 0, duration: 0.3, ease: "power3.out" });
+        gsap.to(item, { scale: 1, boxShadow: "none", duration: 0.3, ease: "power3.out" });
+      });
+    });
+
+    // Thank You text fade in on show with 3D scale and rotation
+    const thankYouText = document.getElementById("thankYouText");
+    const observer = new MutationObserver(() => {
+      if (document.getElementById("thankyou").classList.contains("active")) {
+        gsap.fromTo(thankYouText, { opacity: 0, scale: 0.8, rotationY: 90 }, { opacity: 1, scale: 1, rotationY: 0, duration: 1, ease: "power2.out" });
+      } else {
+        gsap.to(thankYouText, { opacity: 0, scale: 0.8, rotationY: 90, duration: 0.5, ease: "power2.in" });
+      }
+    });
+    observer.observe(document.getElementById("thankyou"), {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  })();
+</script>
+</body>
+</html>
